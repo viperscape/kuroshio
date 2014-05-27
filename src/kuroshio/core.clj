@@ -50,7 +50,8 @@
   (put! [this v] "inserts value onto tail of stream & extends it")
   (shift! [this n] "shift head towards tail n times, returns shift count")
   (from [this] "returns lazy-seq of stream")
-  (from! [this] "returns lazy-seq & moves head"))
+  (from! [this] "returns lazy-seq & moves head")
+  (take! [this] "short hand for taking first with from!"))
 
 
 (deftype s* [#^clojure.lang.Atom head ^{:volatile-mutable true} tail]
@@ -60,7 +61,8 @@
     tail)
   (shift! [this n] (count (take n (from! this))))
   (from [this] (map #(if (= ::nil %) nil %) (v<- @head nil)))
-  (from! [this] (map #(if (= ::nil %) nil %) (v<-! head nil))))
+  (from! [this] (map #(if (= ::nil %) nil %) (v<-! head nil)))
+  (take! [this] (first (from! this))))
 
 (defn new-s* 
   ([] (let [p (promise)] (s*. (atom p) p)))
