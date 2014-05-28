@@ -12,7 +12,7 @@
        (remove #(not (or (= c (:c %))
                          (= :all (:c %)))) s)))
 
-(defrecord data [#^c* c v])
+(defrecord data [c v])
 
 (deftype c* [#^kuroshio.core.s* s]
   C*

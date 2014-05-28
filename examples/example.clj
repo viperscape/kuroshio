@@ -1,5 +1,6 @@
 (ns kuroshio.example
-  (require [kuroshio.core :as k]))
+  (require [kuroshio.core :as k]
+           [kuroshio.chan :as c]))
 
 (let [s (k/new-s*)
       s-copy (k/new-s* s) ;;duplicate stream
