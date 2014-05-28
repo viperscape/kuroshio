@@ -51,7 +51,8 @@
   (shift! [this n] "shift head towards tail n times, returns shift count")
   (from [this] "returns lazy-seq of stream")
   (from! [this] "returns lazy-seq & moves head")
-  (take! [this] "short hand for taking first with from!"))
+  (take! [this] "short hand for taking first with from!")
+  (get-tail [this]))
 
 
 (deftype s* [#^clojure.lang.Atom head ^{:volatile-mutable true} tail]
@@ -62,11 +63,9 @@
   (shift! [this n] (count (take n (from! this))))
   (from [this] (map #(if (= ::nil %) nil %) (v<- @head nil)))
   (from! [this] (map #(if (= ::nil %) nil %) (v<-! head nil)))
-  (take! [this] (first (from! this))))
+  (take! [this] (first (from! this)))
+  (get-tail [this] tail))
 
 (defn new-s* 
   ([] (let [p (promise)] (s*. (atom p) p)))
-  ([^s* s] (s*. (atom @(.head s)) s)))
-
- 
- 
+  ([^s* s] (s*. (atom @(.head s)) (get-tail s))))
