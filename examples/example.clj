@@ -26,4 +26,17 @@
   (prn(take 10 (k/from! s2))) ;; ({:t2 16} {:t1 17} {:t1 18} {:t2 19})
 
   ;; note how s-copy kept its original starting point
-  (take 5 (k/from s-copy))) ;; (0 1 2 3 4)
+  (prn(take 5 (k/from s-copy))) ;; (0 1 2 3 4)
+
+
+  ;; channels using a single stream
+  (let [sc (k/new-s*) ;;new stream for our channels
+        ch1 (c/new-c* sc)
+        ch2 (c/new-c* sc)]
+    (c/send! ch2 :hi) ;; send to just one specific channel
+    (c/send! ch1 :yo)
+    (c/broadcast! ch1 :hi-yall) ;; sends to all channels on stream
+    (prn(c/from! ch2)) ;; (:hi :hi-yall)
+    (prn(c/from! ch2)) ;; ()
+    (c/broadcast! ch2 :bye-bye) ;; any channel can be specified for broadcast
+    (prn(c/from! ch1)))) ;; (:yo :hi-yall :bye-bye)
