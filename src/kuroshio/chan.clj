@@ -32,4 +32,3 @@
 
 (defn new-c*
   ([#^kuroshio.core.s* s] (c*. (new-s* s))))
-
