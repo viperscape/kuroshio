@@ -5,16 +5,18 @@
 
 (defprotocol Bi-C*
   (send! [this v])
-  (from [this])
-  (from! [this])
+  (from [this] [this w])
+  (from! [this] [this w])
   (take! [this]))
 
-(deftype bi-c* [#^kuroshio.chan.c* from #^kuroshio.chan.c* to]
+(deftype bi-c* [#^kuroshio.chan.c* from-ch #^kuroshio.chan.c* to-ch]
   Bi-C*
-  (send! [this v] (c/send! to v))
-  (from! [this] (c/from! from))
-  (from [this] (c/from from))
-  (take! [this] (c/take! from)))
+  (send! [this v] (c/send! to-ch v))
+  (from! [this] (from! this nil))
+  (from! [this w] (c/from! from-ch w))
+  (from [this] (from this nil))
+  (from [this w] (c/from from-ch w))
+  (take! [this] (c/take! from-ch)))
 
 (defn new-bi-c* []
   (let [s (c/new-s*)

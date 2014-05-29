@@ -36,7 +36,7 @@
 (defn v<-! [head wait]
   ((fn [head wait]
     (let [h @head
-          r (first (v<- h nil))]
+          r (first (v<- h wait))]
       (if r
         (if (compare-and-set! head 
                               h
@@ -49,8 +49,8 @@
 (defprotocol S*
   (put! [this v] "inserts value onto tail of stream & extends it")
   (shift! [this n] "shift head towards tail n times, returns shift count")
-  (from [this] "returns lazy-seq of stream")
-  (from! [this] "returns lazy-seq & moves head")
+  (from [this] [this w] "returns lazy-seq of stream")
+  (from! [this] [this w] "returns lazy-seq & moves head")
   (take! [this] "short hand for taking first with from!")
   (get-tail [this]))
 
@@ -61,9 +61,14 @@
     (set! tail (v->* head tail v))
     tail)
   (shift! [this n] (count (take n (from! this))))
-  (from [this] (map #(if (= ::nil %) nil %) (v<- @head nil)))
-  (from! [this] (map #(if (= ::nil %) nil %) (v<-! head nil)))
-  (take! [this] (first (from! this)))
+
+  (from [this] (from this nil))
+  (from [this w] (map #(if (= ::nil %) nil %) (v<- @head w)))
+
+  (from! [this] (from! this nil))
+  (from! [this w] (map #(if (= ::nil %) nil %) (v<-! head w)))
+
+  (take! [this] (first (from! this :force)))
   (get-tail [this] tail))
 
 (defn new-s* 

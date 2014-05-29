@@ -1,4 +1,4 @@
-(ns kuroshio.example
+(ns examples.example
   (require [kuroshio.core :as k]
            [kuroshio.chan :as c]))
 

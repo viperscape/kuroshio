@@ -1,4 +1,5 @@
-(require '[kuroshio.bichan :as bichan :refer [new-bi-c* send! take!]])
+(ns examples.bichan
+  (:require [kuroshio.bichan :as bichan :refer [new-bi-c* send! take!]]))
 
 (let [bi-ch (new-bi-c*)
       ch (first bi-ch)]
@@ -8,5 +9,4 @@
              (send! f-ch :end))))
 
   (send! ch :start)
-  (Thread/sleep 20)
   (take! ch)) ;; :end

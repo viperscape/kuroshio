@@ -4,8 +4,8 @@ kuroshio streams are built using lazy-seq of nested promises. It provides a way 
 
 > Stream methods
 - put! which extends the stream with the new value
-- from and from! which return lazy sequences, the latter of which moves the head of the stream (consuming it)
-- take! which returns one value, consuming the stream
+- from and from! which return lazy sequences, the latter of which moves the head of the stream (consuming it); note that these can be overloaded with :force to block during a take
+- take! which returns one value, consuming the stream; note that this purposefuly blocks waiting for a result
 - and shift! which consumes the stream, returning how far it successfully moved
 
 kuroshio channels are built on top of streams and make use of lazy filtering built in to Clojure. Instead of creating multiple streams dedicated to each communication channel you might need, you can instead use a single stream and multiple channels filtering on that stream. Channels can send to one another, as well as a broadcast to all channels on that stream.

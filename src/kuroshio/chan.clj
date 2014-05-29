@@ -3,8 +3,8 @@
 
 (defprotocol C*
   (put! [this ch v])
-  (from [this])
-  (from! [this])
+  (from [this] [this w])
+  (from! [this] [this w])
   (take! [this]))
 
 (defn filter-chan [c s]
@@ -17,9 +17,11 @@
 (deftype c* [#^kuroshio.core.s* s]
   C*
   (put! [this ch v] (k/put! s (data. ch v)))
-  (from! [this] (filter-chan this (k/from! s)))
-  (from [this] (filter-chan this (k/from s)))
-  (take! [this] (first(from! this))))
+  (from! [this] (from! this nil))
+  (from! [this w] (filter-chan this (k/from! s w)))
+  (from [this] (from this nil))
+  (from [this w] (filter-chan this (k/from s w)))
+  (take! [this] (first(from! this :force))))
 
 (defn send! [c v]
   (put! c c v))

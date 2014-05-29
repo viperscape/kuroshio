@@ -1,4 +1,4 @@
-(ns kuroshio.pool
+(ns examples.pool
   (:require [kuroshio.core :as k]))
 
 (defn broadcast! [pool v]
@@ -14,6 +14,8 @@
       s2 (add-stream! pool)]
 
   (k/put! s2 s1)
-  (broadcast! pool :hi)
+  (future(do
+           (Thread/sleep 500)
+           (broadcast! pool :hi)))
 
-  (k/from! s2)) ;; (#<s* kuroshio.core.s*@68f8093f> :hi)
+  (take 2 (k/from! s2 :force))) ;; (#<s* kuroshio.core.s*@68f8093f> :hi)
