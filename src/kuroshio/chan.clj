@@ -12,25 +12,32 @@
        (remove #(not (or (= c (:c %))
                          (= :all (:c %)))) s)))
 
-(defrecord data [c v])
+(defrecord chan-data [c v])
+(defn chan-data? [v]
+  (= chan-data (type v)))
 
 (deftype c* [#^kuroshio.core.s* s]
   C*
-  (put! [this ch v] (k/put! s (data. ch v)))
+  (put! [this ch v] (k/put! s (chan-data. ch v)))
   (from! [this] (from! this nil))
   (from! [this w] (filter-chan this (k/from! s w)))
   (from [this] (from this nil))
   (from [this w] (filter-chan this (k/from s w)))
   (take! [this] (first(from! this :force))))
 
-(defn send! [c v]
+(defn chan? [c]
+  (= c* (type c)))
+
+(defn send! [#^c* c v]
   (put! c c v))
-(defn broadcast! [c v]
+(defn broadcast! [#^c* c v]
   (put! c :all v))
 
-(defn new-s*
-  ([] (k/new-s*))
-  ([#^kuroshio.core.s* s] (k/new-s* s)))
+(defn new-stream
+  "convenience fn"
+  ([] (k/new-stream))
+  ([#^kuroshio.core.s* s] (k/new-stream s)))
 
-(defn new-c*
-  ([#^kuroshio.core.s* s] (c*. (new-s* s))))
+(defn new-chan
+  ([#^kuroshio.core.s* s] (c*. (k/new-stream s))))
+

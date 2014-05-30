@@ -2,9 +2,9 @@
   (require [kuroshio.core :as k]
            [kuroshio.chan :as c]))
 
-(let [s (k/new-s*)
-      s-copy (k/new-s* s) ;;duplicate stream
-      s2 (k/new-s*)]
+(let [s (k/new-stream)
+      s-copy (k/new-stream s) ;;duplicate stream
+      s2 (k/new-stream)]
   (doseq [n (range 1e5)] (k/put! s n)) ;;lets put a bunch of numbers in this stream
   (k/put! s2 -1)
   (k/put! s2 nil) ;;this gets transformed to ::nil and then back again once taken back out of the stream
@@ -32,9 +32,9 @@
 
 
 ;; channels using a single stream
-(let [sc (k/new-s*) ;;new stream for our channels
-      ch1 (c/new-c* sc)
-      ch2 (c/new-c* sc)]
+(let [sc (k/new-stream) ;;new stream for our channels
+      ch1 (c/new-chan sc)
+      ch2 (c/new-chan sc)]
   (c/send! ch2 :hi) ;; send to just one specific channel
   (c/send! ch1 :yo)
   (c/broadcast! ch1 :hi-yall) ;; sends to all channels on stream
@@ -45,7 +45,7 @@
 
 
 
-(let [s (k/new-s*)]
+(let [s (k/new-stream)]
   (doseq [n (range 1e5)] (k/put! s n))
 
   (let [odds (filter odd? (k/from! s))] ;;this is lazy and unrealized

@@ -18,9 +18,9 @@
   (from [this w] (c/from from-ch w))
   (take! [this] (c/take! from-ch)))
 
-(defn new-bi-c* []
-  (let [s (c/new-s*)
-        ch1 (c/new-c* s)
-        ch2 (c/new-c* s)]
+(defn new-bichan []
+  (let [s (c/new-stream)
+        ch1 (c/new-chan s)
+        ch2 (c/new-chan s)]
     [(bi-c*. ch1 ch2)
      (bi-c*. ch2 ch1)]))

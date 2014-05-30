@@ -1,7 +1,7 @@
 (ns examples.bichan
-  (:require [kuroshio.bichan :as bichan :refer [new-bi-c* send! take!]]))
+  (:require [kuroshio.bichan :as bichan :refer [new-bichan send! take!]]))
 
-(let [bi-ch (new-bi-c*)
+(let [bi-ch (new-bichan)
       ch (first bi-ch)]
 
   (future(let [f-ch (second bi-ch)]

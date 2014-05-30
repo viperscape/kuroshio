@@ -10,7 +10,7 @@
   (doseq [s @(:p p)] (k/put! s v)))
 
 (defn add! 
-  ([#^pool p] (add! p (k/new-s*)))
+  ([#^pool p] (add! p (k/new-stream)))
   ([#^pool p #^kuroshio.core.s* s] 
      (swap! (:p p) conj s)
      s))

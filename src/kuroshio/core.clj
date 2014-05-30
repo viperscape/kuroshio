@@ -73,6 +73,9 @@
   (take! [this] (first (from! this :force)))
   (get-tail [this] tail))
 
-(defn new-s* 
+(defn new-stream 
   ([] (let [p (promise)] (s*. (atom p) p)))
   ([^s* s] (s*. (atom @(.head s)) (get-tail s))))
+
+(defn stream? [s]
+  (= s* (type s)))
