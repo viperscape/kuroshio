@@ -18,6 +18,9 @@
   (from [this w] (c/from from-ch w))
   (take! [this] (c/take! from-ch)))
 
+(defn bichan? [c]
+  (= bi-c* (type c)))
+
 (defn new-bichan []
   (let [s (c/new-stream)
         ch1 (c/new-chan s)
