@@ -54,6 +54,8 @@
   (take! [this] "short hand for taking first with from!")
   (get-tail [this]))
 
+(defn- revert-nil [s]
+  (map #(if (= ::nil %) nil %) s))
 
 (deftype s* [#^clojure.lang.Atom head ^{:volatile-mutable true} tail]
   S*
@@ -63,10 +65,10 @@
   (shift! [this n] (count (take n (from! this))))
 
   (from [this] (from this nil))
-  (from [this w] (map #(if (= ::nil %) nil %) (v<- @head w)))
+  (from [this w] (revert-nil (lazy-seq (v<- @head w))))
 
   (from! [this] (from! this nil))
-  (from! [this w] (map #(if (= ::nil %) nil %) (v<-! head w)))
+  (from! [this w] (revert-nil (lazy-seq (v<-! head w))))
 
   (take! [this] (first (from! this :force)))
   (get-tail [this] tail))
