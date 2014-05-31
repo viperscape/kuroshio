@@ -6,8 +6,9 @@
 (defn pool? [p]
   (= pool (type p)))
 
-(defn broadcast! [^pool p v]
+(defn broadcast! 
   "broadcast to all streams in the pool"
+  [^pool p v]
   (doseq [s @(:p p)] (k/put! s v)))
 
 (defn add! 
@@ -23,15 +24,17 @@
   (let [p (pool. (atom #{}))]
     p))
 
-(defn merge-pool! [p1 p2]
+(defn merge-pool! 
   "merges second pool into first pool, empties second pool"
+  [p1 p2]
   (doseq [n @(:p p2)]
     (remove! p2 n)
     (add! p1 n))
   p1)
 
-(defn members [^pool p]
+(defn members 
   "returns the current pool's members"
+  [^pool p]
    @(:p p))
 
 (defn member? [^pool p ^kuroshio.core.s* s]
