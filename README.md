@@ -10,7 +10,7 @@ kuroshio streams are built using lazy-seq of nested promises. It provides a way 
 
 kuroshio channels are built on top of streams and make use of lazy filtering built in to Clojure. Instead of creating multiple streams dedicated to each communication channel you might need (see [stream pools](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj)), you can instead use a single stream and multiple channels filtering on that stream. Channels can send to one another, as well as a broadcast to all channels on that stream.
 
-> [Channel](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L34) methods
+> [Channel](https://github.com/viperscape/kuroshio/blob/master/examples/chan.clj) methods
 -  send! sends to a specified channel
 -  broadcast! sends to all channels associated with the stream
 -  from/from! and take! which are identical to stream methods

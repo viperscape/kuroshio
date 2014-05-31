@@ -37,11 +37,11 @@
       ch2 (c/new-chan sc)]
   (c/send! ch2 :hi) ;; send to just one specific channel
   (c/send! ch1 :yo)
-  (c/broadcast! ch1 :hi-yall) ;; sends to all channels on stream
+  (c/broadcast! ch1 :hi-yall) ;; sends to all other channels on stream
   (prn(c/from! ch2)) ;; (:hi :hi-yall)
   (prn(c/from! ch2)) ;; ()
-  (c/broadcast! ch2 :bye-bye) ;; any channel can be specified for broadcast
-  (prn(c/from! ch1))) ;; (:yo :hi-yall :bye-bye)
+  (c/broadcast! ch2 :bye-bye) ;; any channel can be specified for broadcast, that channel is excluded from receiving the broadcast in the current version of kuroshio
+  (prn(c/from! ch1))) ;; (:yo :bye-bye)
 
 
 
