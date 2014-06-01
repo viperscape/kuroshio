@@ -9,7 +9,6 @@
     (future (send! director (take! ch))))
 
   (broadcast! director :hi)
-  (prn :tail (kuroshio.core/get-tail s))
   (prn(take 5 (from! director :force)))  ;; (:hi :hi :hi :hi :hi)
 
 
@@ -22,7 +21,7 @@
 
   ;; the futures/threads will finish out of order
   (prn(take 5 (from! director :force))) ;; (1 2 0 4 3)
-
+  (prn (from! director)) ;; ()
 
 
   
@@ -40,5 +39,8 @@
 
     (Thread/sleep 200)
     (prn(from err-ch)) ;; ({#<c* kuroshio.chan.c*@2ec41dd4> "Divide by zero"})
-    (prn(from director)) ;; (4 2 3 1)
-    (broadcast! director :quit)))
+    (prn(from! director)) ;; (4 2 3 1)
+    (broadcast! director :quit))
+
+  (broadcast! s "this is for all channels on stream")
+  (prn(from director))) ;; ("this is for all channels on stream")
