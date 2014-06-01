@@ -47,15 +47,14 @@
   "pulls value from stream head, waits if necessary. safely resets head of stream to next position, only then does it return pulled value"
   [head wait]
   ((fn [head wait]
-    (let [h @head
-          r (first (v<- h wait))]
-      (if r
-        (if (compare-and-set! head 
-                              h
-                              (>n* h 1))
-          (cons r
-                (lazy-seq (v<-! head wait)))
-          (recur head wait)))))
+     (let [h @head]
+       (if-let [r (first (v<- h wait))]
+         (if (compare-and-set! head 
+                               h
+                               (>n* h 1))
+           (cons r
+                 (lazy-seq (v<-! head wait)))
+           (recur head wait)))))
    head wait))
 
 (defprotocol S*
