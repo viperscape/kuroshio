@@ -43,7 +43,7 @@ Please see initial [examples](https://github.com/viperscape/kuroshio/tree/master
      (let [v (take 1 (from s))] ;; not bad, returns val or ::empty so nil values are evident and doesn't block
      	  (if (empty? v) ::empty (first v))))
 ```
-- [broadcasting to a pool](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj#L12) will send values to all attached streams while [broadcasting with a channel](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L40) is only to all other channels (not the initiating channel)
+- [broadcasting to a pool](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj#L12) will send values to all attached streams while [broadcasting with a channel](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L40) is only to all other channels (not the initiating channel); consider broadcasting to stream with associated channels [for all channels to recieve](https://github.com/viperscape/kuroshio/blob/master/examples/chan.clj#L45)
 - from and from! are [lazy](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L51) and thus need to be [realized in some way] (http://clojuredocs.org/clojure_core/clojure.core/doall)
 
 ## Future
