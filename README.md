@@ -24,6 +24,28 @@ kuroshio channels are built on top of streams and make use of lazy filtering bui
 
 Please see initial [examples](https://github.com/viperscape/kuroshio/tree/master/examples), more to come.
 
+## Caveats
+
+> There are a few caveats to be aware of in kuroshio, which may or may not stick around as development progesses
+- never force a stream without taking a finite amount from it
+```clojure
+(let [mystream (new-stream)]
+     (from mystream :force) ;;bad, will always block
+     (take 50 (from mystream :force)) ;; good, waits on 50 elements
+     (from mystream)) ;; not necessarily bad, pulls what ever is available, does not force/block
+```
+- there is currently no way to short circuit a forced realization on a stream
+- take! should be preferred over first on an unforced stream, else you cannot determine if nil is present
+``` clojure
+(let [s (new-stream)]
+     (take! s) ;; best, only returns nil if it was actuslly put onto stream but will block waiting for it
+     (first (from s)) ;; bad, might return nil because no value was retrieved, not because nil was present
+     (let [v (take 1 (from s))] ;; not bad, returns val or ::empty so nil values are evident and doesn't block
+     	  (if (empty? v) ::empty (first v))))
+```
+- [broadcasting to a pool](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj#L12) will send values to all attached streams while [broadcasting with a channel](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L40) is only to all other channels (not the initiating channel)
+- from and from! are [lazy](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L51) and thus need to be [realized in some way] (http://clojuredocs.org/clojure_core/clojure.core/doall)
+
 ## Future
 
 I would like to abstract some things away and provide a more unified way of using the different types, hopefully preventing multiple dependency require statements
