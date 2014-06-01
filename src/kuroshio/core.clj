@@ -3,37 +3,49 @@
 
 (defn -main  [& args] )
 
-(defn v-> [h t v]
+(defn v-> 
+  "pushes new value onto tail"
+  [t v]
   (let [p (promise)]
     (if (deliver t (cons 
                     (if-not v ::nil v) ;; may remove this nil transform
                     (list p)))
       p)))
- 
-(defn v<- [s w]
+
+(defn v<- 
+  "pulls values from stream on demand, builds lazy seq"
+  [s w]
   (if (or (realized? s) w) ;; or wait
     (cons (first @s)
           (lazy-seq (v<- (second @s) w)))))
 
 (def >*
-  (fn [s]
+  "recursively finds tail, returns it"
+  (fn 
+    [s]
      (if-not (realized? s)
        s
        (recur (second @s)))))
 
 (def >n*
-  (fn [s n]
+  "recursively moves up stream n times and return that position, or if finds tail returns it"
+  (fn 
+    [s n]
     (if-not (and (> n 0) (realized? s))
       s
       (recur (second @s) (dec n)))))
 
-(defn v->* [h t v]
+(defn v->* 
+  "attempts to push new value onto tail, if not then recursively finds tail and tries again"
+  [t v]
   (loop [_t t]
-    (if-let [_ (v-> h _t v)]
+    (if-let [_ (v-> _t v)]
       _
       (recur (>* _t)))))
 
-(defn v<-! [head wait]
+(defn v<-! 
+  "pulls value from stream head, waits if necessary. safely resets head of stream to next position, only then does it return pulled value"
+  [head wait]
   ((fn [head wait]
     (let [h @head
           r (first (v<- h wait))]
@@ -60,7 +72,7 @@
 (deftype s* [#^clojure.lang.Atom head ^{:volatile-mutable true} tail]
   S*
   (put! [this v] 
-    (set! tail (v->* head tail v))
+    (set! tail (v->* tail v))
     tail)
   (shift! [this n] (count (take n (from! this))))
 
