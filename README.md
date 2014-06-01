@@ -2,7 +2,7 @@
 
 kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact.
 
-> [Stream](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L5) methods
+> [Stream](https://github.com/viperscape/kuroshio/blob/master/examples/stream.clj) methods
 - put! which extends the stream with the new value
 - from and from! which return lazy sequences, the latter of which moves the head of the stream (consuming it); note that these can be overloaded with :force to block during a take
 - take! which returns one value, consuming the stream; note that this purposefuly blocks waiting for a result
