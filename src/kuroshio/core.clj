@@ -71,11 +71,16 @@
   (from! [this w] (revert-nil (lazy-seq (v<-! head w))))
 
   (take! [this] (first (from! this :force)))
-  (get-tail [this] tail))
+  (get-tail [this] (>* @head)))
 
-(defn new-stream 
+(defn new-stream
+  "creates a new stream, stream argument specifies another stream which creates a new head"
   ([] (let [p (promise)] (s*. (atom p) p)))
-  ([^s* s] (s*. (atom @(.head s)) (get-tail s))))
+  ([^s* s] (s*. (atom @(.head s)) (get-tail s)))
+  ([^s* s head] (let [h (if (= head :tail) 
+                                   (get-tail s)
+                                   head)]
+                        (s*. (atom h) (get-tail s)))))
 
 (defn stream? [s]
   (= s* (type s)))

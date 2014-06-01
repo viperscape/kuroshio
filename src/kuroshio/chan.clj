@@ -37,14 +37,17 @@
   ([^c* c v] (put! c c v))
   ([^c* tc v #^c* fc] (put! fc tc v)))
 
-(defn broadcast! [^c* c v]
-    (put! c :all v))
+(defn broadcast! 
+  "broadcasts to all other channels in the stream"
+  [^c* c v]
+  (put! c :all v))
 
 (defn new-stream
   "convenience fn"
   ([] (k/new-stream))
-  ([^kuroshio.core.s* s] (k/new-stream s)))
+  ([^kuroshio.core.s* s] (k/new-stream s))
+  ([^kuroshio.core.s* s head] (k/new-stream s head)))
 
 (defn new-chan
-  ([^kuroshio.core.s* s] (c*. (k/new-stream s))))
+  ([^kuroshio.core.s* s] (c*. (k/new-stream s :tail))))
 

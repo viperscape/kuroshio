@@ -9,6 +9,7 @@
     (future (send! director (take! ch))))
 
   (broadcast! director :hi)
+  (prn :tail (kuroshio.core/get-tail s))
   (prn(take 5 (from! director :force)))  ;; (:hi :hi :hi :hi :hi)
 
 
@@ -19,12 +20,13 @@
   (doseq [ch chans] 
     (future (send! director (take! ch))))
 
+  ;; the futures/threads will finish out of order
   (prn(take 5 (from! director :force))) ;; (1 2 0 4 3)
 
 
 
   
-  (let [err-ch (new-chan s)] ;;note that in current version of kuroshio this will pick up the previous broadcast :hi
+  (let [err-ch (new-chan s)] ;; this discards previous broadcasts
     (doseq [ch chans] 
       (future (loop []
                 (let [v (take! ch)]
@@ -37,6 +39,6 @@
 
 
     (Thread/sleep 200)
-    (prn(from err-ch)) ;; (:hi {#<c* kuroshio.chan.c*@2ec41dd4> "Divide by zero"})
+    (prn(from err-ch)) ;; ({#<c* kuroshio.chan.c*@2ec41dd4> "Divide by zero"})
     (prn(from director)) ;; (4 2 3 1)
     (broadcast! director :quit)))
