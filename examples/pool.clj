@@ -13,6 +13,6 @@
   (remove! p s2)
   (broadcast! p :hi-again)
   (prn(k/from s2)) ;; (#<s* kuroshio.core.s*@1c4e4efb> :hi)
-  (merge-pool p p2)
+  (merge-pool! p p2)
   (prn (members p) (members p2)) ;; #{#<s* kuroshio.core.s*@2ade3569> #<s* kuroshio.core.s*@6284967b>} #{}
   (prn(member? p s3))) ;; true
