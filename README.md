@@ -51,7 +51,6 @@ Please see initial [examples](https://github.com/viperscape/kuroshio/tree/master
 (defn weave! [s]
   (lazy-seq (cons (doall (map #(k/take! %) s))
                   (weave! s))))
-
 (apply concat (take 2 (weave! (my-seq-of-streams))))
 ;; or perhaps
 (first (weave! (my-seq-of-streams)))
