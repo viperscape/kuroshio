@@ -22,13 +22,9 @@ kuroshio channels are built on top of streams and make use of lazy filtering bui
 - ["bidirectional" channels](https://github.com/viperscape/kuroshio/blob/master/examples/bichan-example.clj), paired channels abstracted as a single channel to communicate between two ends
 - identity checks for types stream?, pool?, chan?, bichan?, chan-data? (should you want to filter channel data from a stream)
 
-## Usage Examples
+There are a few caveats to be aware of in kuroshio, which may or may not stick around as development progesses
 
-Please see initial [examples](https://github.com/viperscape/kuroshio/tree/master/examples), more to come.
-
-## Caveats
-
-> There are a few caveats to be aware of in kuroshio, which may or may not stick around as development progesses
+> ##### Caveats
 - never force a stream without taking a finite amount from it
 ```clojure
 (let [mystream (new-stream)]
