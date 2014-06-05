@@ -17,7 +17,9 @@ kuroshio channels are built on top of streams and make use of lazy filtering bui
 -  broadcast! sends to all channels associated with the stream
 -  from/from! and take! which are identical to stream methods
 
-> extras
+There are a few extras thrown in that may or may not get changed in future releases
+
+> Extras
 - [stream pools](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj), which are literally grouped streams; this is good for broadcasting to individual streams
 - ["bidirectional" channels](https://github.com/viperscape/kuroshio/blob/master/examples/bichan-example.clj), paired channels abstracted as a single channel to communicate between two ends
 - identity checks for types stream?, pool?, chan?, bichan?, chan-data? (should you want to filter channel data from a stream)
