@@ -8,7 +8,7 @@
   (let [_s (new-stream s)] ;;build our own stream copy to work on
     (fn [] 
       (->>
-       s
+       _s
        from!
        (map #(t %))
        (remove nil?)))))
