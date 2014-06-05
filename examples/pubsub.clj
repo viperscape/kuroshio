@@ -7,11 +7,9 @@
   {:pre [(keyword? t)]}
   (let [_s (new-stream s)] ;;build our own stream copy to work on
     (fn [] 
-      (->>
-       _s
-       from!
-       (map #(t %))
-       (remove nil?)))))
+      (->> (from! _s)
+           (map #(t %))
+           (remove nil?)))))
 
 (let [s (new-stream)
       ui-sub (sub :ui s)]
