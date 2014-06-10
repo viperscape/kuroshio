@@ -30,3 +30,34 @@
     
     (Thread/sleep 10) ;;wait for consumer future
     (c/send! p1 :quit)))
+
+
+(defn trans 
+  "signal transform example; transition chan is signaled when to change, and always in a sequential manner because of the chaining in the map"
+  []
+  (let [s (k/new-stream)
+        t1 (c/new-chan s)
+        ;; chain together signals to transition between
+        trans-light {:red :green, :green :yellow, :yellow :red}
+        trans-screen {:menu :game-screen, :game-screen :menu}
+        transfn (fn [_sig] 
+                  (loop [sig _sig]
+                    (when-let [new-sig (sig (c/take! t1))]
+                      (prn new-sig)
+                      (recur new-sig))))]
+
+    ;; transition between street light signals
+    (future (transfn :red))
+    (c/send! t1 trans-light) ;; :green
+    (c/send! t1 trans-light) ;; :yellow
+    (c/send! t1 trans-light) ;; :red
+    (c/send! t1 trans-light) ;; :green
+    (c/send! t1 :quit)
+
+    (Thread/sleep 20)
+    ;; swap between a game-screen and a menu
+    (future (transfn :menu)) ;; start on menu
+    (c/send! t1 trans-screen) ;; :game-screen
+    (c/send! t1 trans-screen) ;; :menu
+    (c/send! t1 trans-screen) ;; :game-screen
+    (c/send! t1 :quit)))
