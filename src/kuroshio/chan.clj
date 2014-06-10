@@ -68,3 +68,10 @@
   "new channels start at the tail of a stream, so no previous broadcasts show up"
   ([^kuroshio.core.s* s] (c*. (k/new-stream s :tail))))
 
+
+(defmacro reply! 
+  "method for replying to data originator channel"
+  [cv & body]
+  `(let [data# (c/take-data! ~(first cv))
+         ~(second cv) (:v data#)]
+     (c/send! (:from-chan data#) ~@body)))
