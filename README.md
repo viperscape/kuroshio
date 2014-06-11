@@ -1,6 +1,6 @@
 # kuroshio
 
-[streams](#stream-methods) | [channels](#channel-methods) | [caveats](#caveats) | [examples](/examples/) | ``` [kuroshio "0.1.0-SNAPSHOT"] ```
+[streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | alpha/experimental | ``` [kuroshio "0.1.0-SNAPSHOT"] ```
 
 kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact.
 
@@ -42,6 +42,13 @@ There are a few caveats to be aware of in kuroshio, which may or may not stick a
      (first (from s)) ;; bad, might return nil because no value was retrieved, not because nil was present
      (let [v (take 1 (from s))] ;; not bad, returns val or ::empty so nil values are evident and doesn't block
      	  (if (empty? v) ::empty (first v))))
+```
+- watch out for lazy-seq caching that's inherent in Clojure:
+```clojure
+(let [cached (c/from! p1)]
+  (prn (take 2 cached)) ;; (0 1)
+  (prn (c/from! p1)) ;; (2 3 4 5 6 7 8 9)
+  (prn cached))) ;; shows cached version from take 2 above => (0 1)
 ```
 - [broadcasting to a pool](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj#L12) will send values to all attached streams while [broadcasting with a channel](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L40) is only to all other channels (not the initiating channel); consider broadcasting to stream with associated channels [for all channels to recieve](https://github.com/viperscape/kuroshio/blob/master/examples/chan.clj#L45)
 - from and from! are [lazy](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L51) and thus need to be [realized in some way] (http://clojuredocs.org/clojure_core/clojure.core/doall)
