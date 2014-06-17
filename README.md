@@ -1,6 +1,6 @@
 # kuroshio
 
-[streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | alpha/experimental | ``` [kuroshio "0.2.0-SNAPSHOT"] ```
+[streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | [rationale](#rationale) | alpha/experimental | ``` [kuroshio "0.2.0-SNAPSHOT"] ```
 
 kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact.
 
@@ -62,6 +62,19 @@ There are a few caveats to be aware of in kuroshio, which may or may not stick a
 ;; or perhaps
 (first (weave! (my-seq-of-streams)))
 ```
+
+There are a few reasons why I started developing kuroshio, primarily out of curiosity:
+
+> ##### Rationale
+- I was interested in a simplistic way to achieve thread-communication
+- wanted to work on a stream of objects without affecting the stream itself; check out kuroshio's stream-copy concept and 'from' method -- these provide ways to look at a stream without affecting other threads looking at the same stream. 
+- wanted non-blocking stream polling methods (look at both from and from!)
+- because of stream-copy it's possible to filter the same stream multiple times for specific contents (check out pub-sub example, or channels in general)
+- wanted a way to add a watcher and logger for data and have it be triggered automatically in another thread (see the watch example in examples/stream)
+- wanted simplistic pipelining
+- geared it to work with typical core lazyseq methods, for ease of use and compatibility
+- I was adamaent about intertwining threads with stream communication as a dependency, they should stay separate and be predictable
+- wanted a seperate async/multitasking portion for kuroshio that isn't tied to threading on the JVM, with 'async' it's currently possible to interleave multiple looping/iterating/generating operations within a single thread (it makes use of channels, though I may change this in the future)
 
 ## Future
 
