@@ -73,7 +73,7 @@ There are a few reasons why I started developing kuroshio, primarily out of curi
 - wanted a way to add a watcher and logger for data and have it be triggered automatically in another thread (see the watch example in examples/stream)
 - wanted simplistic pipelining
 - geared it to work with typical core lazyseq methods, for ease of use and compatibility
-- I was adamaent about intertwining threads with stream communication as a dependency, they should stay separate and be predictable
+- I was adamaent about not intertwining threads with stream communication as a dependency, they should stay separate and be predictable
 - wanted a seperate async/multitasking portion for kuroshio that isn't tied to threading on the JVM, with 'async' it's currently possible to interleave multiple looping/iterating/generating operations within a single thread (it makes use of channels, though I may change this in the future)
 
 ## Future
