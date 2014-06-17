@@ -52,3 +52,28 @@
     (yield (asmap f (rest coll) (conj 
                                  (into [] (first results))
                                  (f (first coll)))))))
+
+(defn asfilter
+  "eager, filters out what doesn't match true with predicate; use in go-task"
+  [f coll & results]
+  (if (empty? coll) 
+    (first results)
+    (yield (asfilter f 
+                     (rest coll)
+                     (if (f (first coll))
+                       (conj (into [] (first results))
+                             (first coll))
+                       (first results))))))
+
+(defn asreduce
+  "similar to reduce, folds left; use in go-task"
+  ([f coll]
+     (yield (asreduce f 
+                      (f (first coll))
+                      (rest coll))))
+  ([f v coll]
+     (if (empty? coll) 
+       v
+       (yield (asreduce f 
+                        (f v (first coll))
+                        (rest coll))))))
