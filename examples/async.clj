@@ -89,3 +89,12 @@
 ;; :inc 5
 ;; :inc 6
   
+(let [tc (task-chan)
+      data (range 10)
+      results (go-task 
+               (asmap #(inc %) data)
+               tc)
+      _ (go-task (increment 10 10) tc)]
+
+  (while (go-step tc))
+  (take! (:c results))) ;; [1 2 3 4 5 6 7 8 9 10]
