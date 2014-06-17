@@ -43,3 +43,12 @@
             (send! (:c nt) (or (first (from! (:c t)))
                                (:c t)))
             nt)))))
+
+(defn asmap 
+  "eager, applies f to each item in coll; use in go-task"
+  [f coll & results]
+  (if (empty? coll) 
+    (first results)
+    (yield (asmap f (rest coll) (conj 
+                                 (into [] (first results))
+                                 (f (first coll)))))))
