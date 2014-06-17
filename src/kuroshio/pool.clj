@@ -39,3 +39,12 @@
 
 (defn member? [^p* p ^kuroshio.core.s* s]
   (not(nil?(@(:pool p) s))))
+
+
+(defn weave! [s]
+  (lazy-seq (cons (doall (map #(k/take! %) s))
+                  (weave! s))))
+
+(defn cat!
+  [^p* p] 
+  (apply concat (map #(k/from! %) @(:pool p))))
