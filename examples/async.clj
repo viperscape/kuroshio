@@ -33,7 +33,7 @@
 ;; :inc 24
 ;; :inc 25
 
-
+;;
 
 (declare my-odd?)
 
@@ -47,9 +47,45 @@
     false
     (yield (my-even? (dec (Math/abs n))))))
 
-;; fyi: this is slower than trampoline
-(time
 (let [tc (task-chan)
       e? (go-task (my-even? 1e4) tc)]
   (while (go-step tc))
-  (take! (:c e?)))) ;;true
+  (take! (:c e?))) ;;true
+
+;;
+
+(defn getresult [ch] 
+  (prn :ch (from ch))
+  (or (first (from! ch))
+      (yield (getresult ch))))
+
+(let [tc (task-chan)
+      work (new-chan (new-stream)) 
+      result (go-task (getresult work) tc)
+      sometask (go-task (increment 50 5) tc)]
+
+  (future (do (Thread/sleep 1)
+              (send! work :result)
+              (go-task (increment 1 5) tc)))
+
+  (while (go-step tc))
+
+  (from (:c result))) ;; (:result)
+
+;; :ch ()
+;; :inc 50
+;; :ch ()
+;; :inc 51
+;; :ch ()
+;; :inc 52
+;; :ch (:result)
+;; :inc 53
+;; :inc 1
+;; :inc 54
+;; :inc 2
+;; :inc 55
+;; :inc 3
+;; :inc 4
+;; :inc 5
+;; :inc 6
+  
