@@ -15,10 +15,9 @@
       tinc20 (go-task (increment 20 5) tc)
       tbye (go-task (prn :bye) tc)]
 
-  (while (tasks? tc)
-    (go-step tc))
+  (while (go-step tc))
 
-  (take! (:c tinc20))) ;; 25
+  (from (:c tinc20))) ;; 25
 
 ;; :hi
 ;; :inc -10
@@ -33,3 +32,24 @@
 ;; :inc 23
 ;; :inc 24
 ;; :inc 25
+
+
+
+(declare my-odd?)
+
+(defn my-even? [n]
+  (if (zero? n)
+    true
+    (yield (my-odd? (dec (Math/abs n))))))
+
+(defn my-odd? [n]
+  (if (zero? n)
+    false
+    (yield (my-even? (dec (Math/abs n))))))
+
+;; fyi: this is slower than trampoline
+(time
+(let [tc (task-chan)
+      e? (go-task (my-even? 1e4) tc)]
+  (while (go-step tc))
+  (take! (:c e?)))) ;;true

@@ -7,7 +7,7 @@
 
 (defn task? [t]
   (= task (type t)))
-(defn tasks? [tc]
+(defn tasks? [^kuroshio.chan.c* tc]
  ; {:pre [(chan? tc)]}
   (= task (type (first (from tc)))))
 
@@ -25,23 +25,21 @@
 (defmacro go-task
   ([f ^kuroshio.chan.c* tc]
    ;  {:pre [(chan? tc)]}
-     `(go (fn [tchan#] ~f) ~tc)))
+     `(go (fn [_#] ~f) ~tc)))
 
 (defmacro yield [f]
-  `(go (fn [tc#] (go-task ~f tc#))))
+  `(fn [tc#] (go (fn [_#] ~f) tc#)))
+;  `(fn [tc#] (go-task ~f tc#)))
 
-(defn push-result [ch v]
-  (loop [_ch ch]
-    (if (empty? (from _ch)) ;;otherwise points to the parent chan
-      (send! _ch v) ;;store the result in the task's chan
-      (recur (take! _ch))))) ;;get parent chan and start over, going backwards
-
-(defn go-step [tc]
+(defn go-step [^kuroshio.chan.c* tc]
   (when-let [t (first (from! tc))] ;;get next task
     (let [v ((:f t) tc)] ;;fire it off, use the result
-      (or (when-not (task? v)
-            (push-result (:c t) v) ;;search backwards and deliver result
+      (or (when-not (fn? v)
+            (send! (or (first (from! (:c t)))
+                       (:c t))
+                   v)
             t)
-          (let [nt ((:f v) tc)] ;;or process subtask
-            (send! (:c nt) (:c t)) ;;searches backwards when finished
+          (let [nt (v tc)] ;;unwrap yield and call with task-chan
+            (send! (:c nt) (or (first (from! (:c t)))
+                               (:c t)))
             nt)))))
