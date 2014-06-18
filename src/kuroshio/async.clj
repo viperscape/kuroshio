@@ -38,7 +38,34 @@
             (send! (:c t) v)
             t) ;;return task for reference
           (v ts t))))) ;;unwrap yield, call with task-stream and reference parent task -- return this new task
-            
+
+
+(defn go-repeat 
+  "repeat passed in fn, ex: (go-repeat #(prn :hi) my-tasks)"
+  [f ts]
+  (go-task (fn [& args] (f) (yield (go-repeat f ts))) ts))
+
+(defn go-sleep 
+  "simple sleep task (milliseconds), combine with go-select"
+  [t ts]
+  (let [f (fn task-sleep [t]
+            (Thread/sleep 1)
+            (if (> t 0) 
+              (yield (task-sleep (dec t)))
+              :timeout))]
+    (go-task (f t) ts)))
+
+(defn go-select 
+  "simple selector between two tasks, chooses task that finished first (combine with go-sleep for a timeout)"
+  [t1 t2 ts]
+  (let [f (fn task-select [t1 t2]
+            (let [r1 (from (:c t1))
+                  r2 (from (:c t2))]
+              (if-let [r (first (remove empty? (vector r1 r2)))]
+                (first r)
+                (yield (task-select t1 t2)))))]
+    (go-task (f t1 t2) ts)))
+    
 
 (defn asmap 
   "eager, applies f to each item in coll; use in go-task"

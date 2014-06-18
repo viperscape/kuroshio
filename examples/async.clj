@@ -98,3 +98,16 @@
       i (go-task (increment 10 10) ts)]
   (while (go-step ts))
   (take! (:c results))) ;; [1 2 3 4 5 6 7 8 9 10]
+
+;;
+
+
+
+(let [ts (new-tasks)
+      p (go-repeat #(prn :hi (new java.util.Date)) ts) ;;never finishes
+      to (go-sleep 10 ts) ;;timeout task of 10 ms
+      sel (:c (go-select to p ts))] ;;select the completing channel
+      
+  (while (empty? (from sel))
+    (go-step ts))
+  (from sel)) ;;(:timeout)
