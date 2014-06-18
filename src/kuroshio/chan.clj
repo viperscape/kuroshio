@@ -72,6 +72,13 @@
 (defmacro reply! 
   "method for replying to data originator channel"
   [cv & body]
-  `(let [data# (c/take-data! ~(first cv))
+  `(let [data# (take-data! ~(first cv))
          ~(second cv) (:v data#)]
-     (c/send! (:from-chan data#) ~@body)))
+     (send! (:from-chan data#) ~@body)))
+
+(defn send> 
+  "convenience function, returns a channel that could be replied to"
+  [ch v]
+  (let [r (new-chan (.s ch))] ;;build reply channel based on same stream
+    (send! ch v r) ;;specify reply channel when sending data
+    r))
