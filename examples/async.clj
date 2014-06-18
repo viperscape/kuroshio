@@ -9,15 +9,15 @@
     (yield (increment (inc i) (dec n)))
     i))
 
-(let [tc (task-chan)
-      tgreet (go-task (do(prn :hi) (yield (prn :hi-yielded-once))) tc)
-      tinc-10 (go-task (increment -10 3) tc)
-      tinc20 (go-task (increment 20 5) tc)
-      tbye (go-task (prn :bye) tc)]
+(let [ts (new-tasks)
+      tgreet (go-task (do(prn :hi) (yield (prn :hi-yielded-once))) ts)
+      tinc-10 (go-task (increment -10 3) ts)
+      tinc20 (go-task (increment 20 5) ts)
+      tbye (go-task (prn :bye) ts)]
 
-  (while (go-step tc))
+  (while (go-step ts))
 
-  (from (:c tinc20))) ;; 25
+  (from (:c tinc20))) ;; (25)
 
 ;; :hi
 ;; :inc -10
@@ -47,10 +47,11 @@
     false
     (yield (my-even? (dec (Math/abs n))))))
 
-(let [tc (task-chan)
-      e? (go-task (my-even? 1e4) tc)]
-  (while (go-step tc))
-  (take! (:c e?))) ;;true
+(let [ts (new-tasks)
+      e? (go-task (my-even? 1e4) ts)]
+  (while (go-step ts))
+  (from (:c e?))) ;;(true)
+
 
 ;;
 
@@ -59,16 +60,16 @@
   (or (first (from! ch))
       (yield (getresult ch))))
 
-(let [tc (task-chan)
+(let [ts (new-tasks)
       work (new-chan (new-stream)) 
-      result (go-task (getresult work) tc)
-      sometask (go-task (increment 50 5) tc)]
+      result (go-task (getresult work) ts)
+      sometask (go-task (increment 50 5) ts)]
 
   (future (do (Thread/sleep 1)
               (send! work :result)
-              (go-task (increment 1 5) tc)))
+              (go-task (increment 1 5) ts)))
 
-  (while (go-step tc))
+  (while (go-step ts))
 
   (from (:c result))) ;; (:result)
 
@@ -89,12 +90,11 @@
 ;; :inc 5
 ;; :inc 6
   
-(let [tc (task-chan)
+(let [ts (new-tasks)
       data (range 10)
       results (go-task 
                (asmap #(inc %) data)
-               tc)
-      _ (go-task (increment 10 10) tc)]
-
-  (while (go-step tc))
+               ts)
+      i (go-task (increment 10 10) ts)]
+  (while (go-step ts))
   (take! (:c results))) ;; [1 2 3 4 5 6 7 8 9 10]

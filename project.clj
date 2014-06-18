@@ -1,4 +1,4 @@
-(defproject kuroshio "0.2.1-SNAPSHOT"
+(defproject kuroshio "0.2.2-SNAPSHOT"
   :description "stream-like thread communication"
   :url "https://github.com/viperscape/kuroshio"
   :license {:name "Eclipse Public License"

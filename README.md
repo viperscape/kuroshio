@@ -1,6 +1,6 @@
 # kuroshio
 
-[streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | [rationale](#rationale) | alpha/experimental | ``` [kuroshio "0.2.1-SNAPSHOT"] ```
+[streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | [rationale](#rationale) | alpha/experimental | ``` [kuroshio "0.2.2-SNAPSHOT"] ```
 
 kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact.
 

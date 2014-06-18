@@ -7,41 +7,47 @@
 
 (defn task? [t]
   (= task (type t)))
-(defn tasks? [^kuroshio.chan.c* tc]
- ; {:pre [(chan? tc)]}
-  (= task (type (first (from tc)))))
 
-(defn task-chan [] (new-chan (new-stream)))
+(defrecord tasks [^kuroshio.core.s* g ^kuroshio.core.s* r])
+(defn new-tasks [] (->tasks (new-stream) (new-stream)))
+
+(defn tasks? [^tasks ts]
+ ; {:pre [(chan? tc)]}
+  (task? (first (k/from (:g ts)))))
+
+
 
 (defn go 
-  ([f] (let [tc (task-chan)]
+  ([f] (let [tc (new-tasks)] ;;not in use yet
          (go f tc)))
-  ([f ^kuroshio.chan.c* tc] 
-    ; {:pre [(chan? tc)]} 
-     (let [t (->task f (new-chan (.s tc)))]
-       (send! tc t)
+  ([f ^tasks ts] ;;fresh task
+   ; {:pre [(chan? tc)]} 
+     (go f ts (new-chan (:r ts))))
+  ([f ^tasks ts target] ;;target may reference parent task
+     (let [t (->task f target)]
+       (k/put! (:g ts) t) ;;add task to task-stream
        t)))
 
 (defmacro go-task
-  ([f ^kuroshio.chan.c* tc]
+  ([f ^tasks ts]
    ;  {:pre [(chan? tc)]}
-     `(go (fn [_#] ~f) ~tc)))
+   `(go (fn [& _#] ~f) ~ts)))
 
 (defmacro yield [f]
-  `(fn [tc#] (go (fn [_#] ~f) tc#)))
-;  `(fn [tc#] (go-task ~f tc#)))
+  `(fn [^tasks ts# ^task t#] (go (fn [& _#] ~f) ts# (:c t#))))
+;  `(fn [ts#] (go-task ~f ts#)))
 
-(defn go-step [^kuroshio.chan.c* tc]
-  (when-let [t (first (from! tc))] ;;get next task
-    (let [v ((:f t) tc)] ;;fire it off, use the result
+(defn go-step [^tasks ts]
+  (when-let [t (first (k/from! (:g ts)))] ;;get next task
+    (let [v ((:f t) ts)] ;;call w/ provided task-stream, use result
       (or (when-not (fn? v)
-            (send! (or (first (from! (:c t)))
-                       (:c t))
+            (send! ;(or (first (from! (:c t)))
+                       (:c t)
                    v)
-            t)
-          (let [nt (v tc)] ;;unwrap yield and call with task-chan
-            (send! (:c nt) (or (first (from! (:c t)))
-                               (:c t)))
+            t) ;;return task for reference
+          (let [nt (v ts t)] ;;unwrap yield, call with task-stream
+           ; (send! (:c nt) (or (first (from! (:c t)))
+           ;                    (:c t)))
             nt)))))
 
 (defn asmap 
