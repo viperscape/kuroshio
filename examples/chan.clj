@@ -52,3 +52,11 @@
     ;; note that d is a variable that becomes the result of what is sent to the channel c2, what's returned (inc d) in the closure is sent back
   (reply! [c2 d] (inc d)) ;; replies to whatever chan sent value to c2, assumes from-chan specified (don't use otherwise, consumes stream)
   (from! c1))) ;; (2)
+
+;;
+
+(let [work (new-chan (new-stream))]
+  (future (reply! [work v] (inc v)))
+
+  ;;waits on work channel
+  (take! (send> work 1))) ;; 2
