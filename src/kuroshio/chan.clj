@@ -78,7 +78,7 @@
 
 (defn send> 
   "convenience function, returns a channel that could be replied to"
-  [ch v]
+  [^c* ch v]
   (let [r (new-chan (.s ch))] ;;build reply channel based on same stream
     (send! ch v r) ;;specify reply channel when sending data
     r))
