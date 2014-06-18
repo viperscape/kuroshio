@@ -8,47 +8,37 @@
 (defn task? [t]
   (= task (type t)))
 
-(defrecord tasks [^kuroshio.core.s* g ^kuroshio.core.s* r])
+(defrecord tasks [^kuroshio.core.s* g ^kuroshio.core.s* r]) ;; go stream (filled with functions) and result stream (filled with chan data)
 (defn new-tasks [] (->tasks (new-stream) (new-stream)))
 
 (defn tasks? [^tasks ts]
- ; {:pre [(chan? tc)]}
   (task? (first (k/from (:g ts)))))
 
 
 
 (defn go 
-  ([f] (let [tc (new-tasks)] ;;not in use yet
-         (go f tc)))
-  ([f ^tasks ts] ;;fresh task
-   ; {:pre [(chan? tc)]} 
+  ([f ^tasks ts] ;;create fresh task with no parent task
      (go f ts (new-chan (:r ts))))
-  ([f ^tasks ts target] ;;target may reference parent task
+  ([f ^tasks ts target] ;;target may or may not reference parent task
      (let [t (->task f target)]
        (k/put! (:g ts) t) ;;add task to task-stream
        t)))
 
 (defmacro go-task
   ([f ^tasks ts]
-   ;  {:pre [(chan? tc)]}
    `(go (fn [& _#] ~f) ~ts)))
 
 (defmacro yield [f]
   `(fn [^tasks ts# ^task t#] (go (fn [& _#] ~f) ts# (:c t#))))
-;  `(fn [ts#] (go-task ~f ts#)))
 
 (defn go-step [^tasks ts]
   (when-let [t (first (k/from! (:g ts)))] ;;get next task
     (let [v ((:f t) ts)] ;;call w/ provided task-stream, use result
       (or (when-not (fn? v)
-            (send! ;(or (first (from! (:c t)))
-                       (:c t)
-                   v)
+            (send! (:c t) v)
             t) ;;return task for reference
-          (let [nt (v ts t)] ;;unwrap yield, call with task-stream
-           ; (send! (:c nt) (or (first (from! (:c t)))
-           ;                    (:c t)))
-            nt)))))
+          (v ts t))))) ;;unwrap yield, call with task-stream and reference parent task -- return this new task
+            
 
 (defn asmap 
   "eager, applies f to each item in coll; use in go-task"
