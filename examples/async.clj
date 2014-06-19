@@ -102,11 +102,42 @@
 ;;
 
 
-
+;; select the task that finishes first
 (let [ts (new-tasks)
-      p (go-repeat #(prn :hi (new java.util.Date)) ts) ;;never finishes
+      p (go-repeat #(prn (System/currentTimeMillis)) ts) ;;never finishes
       to (go-sleep 10 ts) ;;timeout task of 10 ms
       sel (:c (go-select to p ts))] ;;select the completing channel
-      
+
   (while (go-step ts)) ;;would loop forever b/c of go-repeat, except select cancels the unending task
-  (from sel)) ;;(:timeout)
+ (from sel)) ;;(:kuroshio.async/timeout)
+
+
+;; go-wait with timeouts (shorthand for go-select with a paired timeout task)
+(let [ts (new-tasks)
+      p (go-repeat #(prn (System/currentTimeMillis)) ts)
+      i (go-task (increment 10 3) ts)
+      selp (go-wait p ts 2)
+      seli (go-wait i ts 50)]
+      
+  (while (go-step ts)) 
+  (prn(timeout? seli)) ;;false
+  (prn(timeout? selp)) ;;true
+  (prn (from (:c selp))) ;;(:kuroshio.async/timeout)
+  (from (:c seli))) ;; (13)
+
+;; 1403199017499
+;; :inc 10
+;; 1403199017500
+;; :inc 11
+;; 1403199017500
+;; :inc 12
+;; 1403199017500
+;; :inc 13
+;; 1403199017501
+;; 1403199017501
+;; 1403199017501
+;; 1403199017501
+;; 1403199017501
+;; 1403199017501
+;; false
+;; true
