@@ -79,10 +79,12 @@
     (go-task (f t1 t2) ts)))
 
 (defn go-wait
-  ([t ts] (let [r (from (:c t))]
-            (if-not (empty? r)
-              (first r)
-              (yield (go-wait t ts)))))
+  ([t ts] (let [f (fn _f [& _]
+                    (let [r (from (:c t))]
+                      (if-not (empty? r)
+                        (first r)
+                        (yield (_f t ts)))))]
+            (go-task (f) ts)))
   ([t ts to] (go-select t (go-sleep to ts) ts)))
 
 (defn asmap 
