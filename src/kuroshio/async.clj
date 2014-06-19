@@ -3,7 +3,7 @@
             [kuroshio.core :as k]))
 
 
-(defrecord task [f ^kuroshio.chan.c* c]) ;; fn and result chan
+(defrecord task [f ^kuroshio.chan.c* c ^kuroshio.core.s* cancel]) ;; fn and result chan, cancel stream (private)
 
 (defn task? [t]
   (= task (type t)))
@@ -20,7 +20,7 @@
   ([f ^tasks ts] ;;create fresh task with no parent task
      (go f ts (new-chan (:r ts))))
   ([f ^tasks ts target] ;;target may or may not reference parent task
-     (let [t (->task f target)]
+     (let [t (->task f target (new-stream))]
        (k/put! (:g ts) t) ;;add task to task-stream
        t)))
 
@@ -33,12 +33,15 @@
 
 (defn go-step [^tasks ts]
   (when-let [t (first (k/from! (:g ts)))] ;;get next task
-    (let [v ((:f t) ts)] ;;call w/ provided task-stream, use result
-      (or (when-not (fn? v)
-            (send! (:c t) v)
-            t) ;;return task for reference
-          (v ts t))))) ;;unwrap yield, call with task-stream and reference parent task -- return this new task
+    (if-not (empty? (k/from (:cancel t))) ;;is this task cancelled?
+      (go-step ts) ;;go to next task
+      (let [v ((:f t) ts)] ;;call w/ provided task-stream, use result
+        (or (when-not (fn? v)
+              (send! (:c t) v)
+              t) ;;return task for reference
+            (v ts t)))))) ;;unwrap yield, call with task-stream and reference parent task -- return this new task
 
+(defn stop-task [t] (k/put! (:cancel t) ::cancel))
 
 (defn go-repeat 
   "repeat passed in fn, ex: (go-repeat #(prn :hi) my-tasks)"
@@ -61,9 +64,10 @@
   (let [f (fn task-select [t1 t2]
             (let [r1 (from (:c t1))
                   r2 (from (:c t2))]
-              (if-let [r (first (remove empty? (vector r1 r2)))]
-                (first r)
-                (yield (task-select t1 t2)))))]
+              (cond
+                (not (empty? r1)) (do (stop-task t2) (first r1))
+                (not (empty? r2)) (do (stop-task t1) (first r2))
+                :else (yield (task-select t1 t2)))))]
     (go-task (f t1 t2) ts)))
     
 

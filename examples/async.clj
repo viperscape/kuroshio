@@ -108,6 +108,5 @@
       to (go-sleep 10 ts) ;;timeout task of 10 ms
       sel (:c (go-select to p ts))] ;;select the completing channel
       
-  (while (empty? (from sel))
-    (go-step ts))
+  (while (go-step ts)) ;;would loop forever b/c of go-repeat, except select cancels the unending task
   (from sel)) ;;(:timeout)
