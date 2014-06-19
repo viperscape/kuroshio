@@ -3,7 +3,7 @@
             [kuroshio.core :as k]))
 
 
-(defrecord task [f ^kuroshio.chan.c* c ^kuroshio.core.s* cancel]) ;; fn and result chan, cancel stream (private)
+(defrecord task [f ^kuroshio.chan.c* c cancel]) ;; fn and result chan, cancel promise -- note: might change result chan to a promise instead of stream
 
 (defn task? [t]
   (= task (type t)))
@@ -18,9 +18,9 @@
 
 (defn go 
   ([f ^tasks ts] ;;create fresh task with no parent task
-     (go f ts (new-chan (:r ts))))
-  ([f ^tasks ts target] ;;target may or may not reference parent task
-     (let [t (->task f target (new-stream))]
+     (go f ts (new-chan (:r ts)) nil))
+  ([f ^tasks ts parent-chan parent-cancel] ;;target may or may not reference parent task
+     (let [t (->task f parent-chan (or parent-cancel (promise)))]
        (k/put! (:g ts) t) ;;add task to task-stream
        t)))
 
@@ -29,11 +29,11 @@
    `(go (fn [& _#] ~f) ~ts)))
 
 (defmacro yield [f]
-  `(fn [^tasks ts# ^task t#] (go (fn [& _#] ~f) ts# (:c t#))))
+  `(fn [^tasks ts# ^task t#] (go (fn [& _#] ~f) ts# (:c t#) (:cancel t#))))
 
 (defn go-step [^tasks ts]
   (when-let [t (first (k/from! (:g ts)))] ;;get next task
-    (if-not (empty? (k/from (:cancel t))) ;;is this task cancelled?
+    (if (realized? (:cancel t)) ;;is this task cancelled?
       (go-step ts) ;;go to next task
       (let [v ((:f t) ts)] ;;call w/ provided task-stream, use result
         (or (when-not (fn? v)
@@ -41,22 +41,30 @@
               t) ;;return task for reference
             (v ts t)))))) ;;unwrap yield, call with task-stream and reference parent task -- return this new task
 
-(defn stop-task [t] (k/put! (:cancel t) ::cancel))
+(defn stop-task [t] (deliver (:cancel t) true))
 
 (defn go-repeat 
   "repeat passed in fn, ex: (go-repeat #(prn :hi) my-tasks)"
-  [f ts]
-  (go-task (fn [& args] (f) (yield (go-repeat f ts))) ts))
+  [f ^tasks ts & args]
+  (if-not args
+    (go-task (do (f) (yield (go-repeat f ts :yield)))
+           ts)
+    (do (f) (yield (go-repeat f ts :yield)))))
+ ; (go-task (fn [& args] (f) (go-repeat f ts)) ts))
 
 (defn go-sleep 
   "simple sleep task (milliseconds), combine with go-select"
   [t ts]
-  (let [f (fn task-sleep [t]
-            (Thread/sleep 1)
-            (if (> t 0) 
-              (yield (task-sleep (dec t)))
-              :timeout))]
-    (go-task (f t) ts)))
+  (let [f (fn task-sleep [t st]
+            (let [ct (System/currentTimeMillis)]
+              (if (< (- ct st) t)
+                (do
+                  (Thread/sleep 0) ;;sleep just a tad
+                  (yield (task-sleep t st)))
+                ::timeout)))]
+    (go-task (f t (System/currentTimeMillis)) ts)))
+
+(defn timeout? [t] (= ::timeout (first (from (:c t))))) ;;non-destructive
 
 (defn go-select 
   "simple selector between two tasks, chooses task that finished first (combine with go-sleep for a timeout)"
@@ -69,7 +77,13 @@
                 (not (empty? r2)) (do (stop-task t1) (first r2))
                 :else (yield (task-select t1 t2)))))]
     (go-task (f t1 t2) ts)))
-    
+
+(defn go-wait
+  ([t ts] (let [r (from (:c t))]
+            (if-not (empty? r)
+              (first r)
+              (yield (go-wait t ts)))))
+  ([t ts to] (go-select t (go-sleep to ts) ts)))
 
 (defn asmap 
   "eager, applies f to each item in coll; use in go-task"
