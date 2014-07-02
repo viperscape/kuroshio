@@ -2,7 +2,12 @@
 
 [streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | [rationale](#rationale) | alpha/experimental | ``` [kuroshio "0.2.3-SNAPSHOT"] ```
 
-kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact.
+#### about
+kuroshio is a Clojure library for creating and operating on streams (delayed, lazily-evaluated, endless lists). Streams work similar to lazy sequences in clojure and in fact are accessed by a return of a lazy-seq object to work on (so lazy-seq and seq operations in clojure work with streams in kuroshio). Streams can be operated on by multiple threads and ease communication between threads.
+
+kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact. When basing a stream object off of another stream (duplicating it) the streams can then be operated on simultaneously and read from in a safe manner while gaining the benefits of lazy-seq caching inherent in Clojure.  
+
+Think of streams as a way to simulate data over time, and process these 'events' at later times, repeatedly. Unlike regular queues which typically contain a single type of emphemeral object, streams can be operated on multiple times from multiple threads and thus can house different data with a central theme. The most basic of examples would be a stream of integers where two threads read the same stream (but two stream objects; duplicated) and each thread filters the integers that they need (i.e. evens for one thread and odds for the other). You could simulate this with queues or linkedlists by reading and then splitting the integers to two more queues/lists to be consumed by the two threads, but this quickly shows how inefficient this process could be.
 
 > ##### [Stream](https://github.com/viperscape/kuroshio/blob/master/examples/stream.clj) methods
 - put! which extends the stream with the new value
