@@ -2,7 +2,7 @@
 
 [streams](#stream-methods) | [channels](#channel-methods) | [examples](/examples/) | [caveats](#caveats) | [rationale](#rationale) | alpha/experimental | ``` [kuroshio "0.2.3-SNAPSHOT"] ```
 
-#### about
+#### About
 kuroshio is a Clojure library for creating and operating on streams (delayed, lazily-evaluated, endless lists). Streams work similar to lazy sequences in clojure and in fact are accessed by a return of a lazy-seq object to work on (so lazy-seq and seq operations in clojure work with streams in kuroshio). Streams can be operated on by multiple threads and ease communication between threads.
 
 kuroshio streams are built using lazy-seq of nested promises. It provides a way to communicate using stream-like representations. There can be multiple producers and consumer threads working on a stream. There is an option to even read from the stream without modifying/consuming it. Values including nil can be placed onto the stream. Finally, streams can be duplicated, which can keep the head/origin of the stream intact. When basing a stream object off of another stream (duplicating it) the streams can then be operated on simultaneously and read from in a safe manner while gaining the benefits of lazy-seq caching inherent in Clojure.  
