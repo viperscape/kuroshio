@@ -120,3 +120,16 @@
        (yield (asreduce f 
                         (f v (first coll))
                         (rest coll))))))
+
+(defn as-> 
+  "reduces over collection of functions, for pipelining"
+  [& fs]
+  (let [_f 
+        (fn step [fs r]
+          (prn fs r)
+          (if (empty? fs) 
+            r
+            (yield (step (rest fs)
+                         ((first fs) r)))))]
+    (yield (_f (rest fs)
+               ((first fs))))))

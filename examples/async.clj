@@ -117,7 +117,7 @@
       p (go-repeat #(prn (System/currentTimeMillis)) ts)
       i (go-task (increment 10 3) ts)
       selp (go-wait p ts 2)
-      seli (go-wait i ts 50)]
+      seli (go-wait i ts)]
       
   (while (go-step ts)) 
   (prn(timeout? seli)) ;;false
@@ -141,3 +141,18 @@
 ;; 1403199017501
 ;; false
 ;; true
+
+;; async pipeline
+(let [ts (new-tasks)
+      pl (go-task (as->
+                   #(inc 2)
+                   #(+ % 3))
+                  ts)
+      pl2 (go-task (as->
+                   #(dec 2)
+                   #(- % 3))
+                  ts)]
+  (while (go-step ts))
+  (let [r1 (take! (:c pl)) ;; 6
+        r2 (take! (:c pl2))] ;; -2
+    (- r1 r2))) ;; 8
