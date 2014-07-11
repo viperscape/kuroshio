@@ -122,7 +122,7 @@
                         (rest coll))))))
 
 (defn as-> 
-  "reduces over collection of functions, for pipelining"
+  "reduces over collection of functions, for pipelining; use in go-task"
   [& fs]
   (let [_f 
         (fn step [fs r]
