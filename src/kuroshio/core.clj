@@ -1,8 +1,6 @@
 (ns kuroshio.core
   (:gen-class))
 
-(defn -main  [& args] )
-
 (defn v-> 
   "pushes new value onto tail"
   [t v]
