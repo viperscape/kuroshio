@@ -48,13 +48,6 @@ There are a few caveats to be aware of in kuroshio, which may or may not stick a
      (let [v (take 1 (from s))] ;; not bad, returns val or ::empty so nil values are evident and doesn't block
      	  (if (empty? v) ::empty (first v))))
 ```
-- watch out for lazy-seq caching that's inherent in Clojure:
-```clojure
-(let [cached (c/from! p1)]
-  (prn (take 2 cached)) ;; (0 1)
-  (prn (c/from! p1)) ;; (2 3 4 5 6 7 8 9)
-  (prn cached))) ;; shows cached version from take 2 above => (0 1)
-```
 - [broadcasting to a pool](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj#L12) will send values to all attached streams while [broadcasting with a channel](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L40) is only to all other channels (not the initiating channel); consider broadcasting to stream with associated channels [for all channels to recieve](https://github.com/viperscape/kuroshio/blob/master/examples/chan.clj#L45)
 - from and from! are [lazy](https://github.com/viperscape/kuroshio/blob/master/examples/example.clj#L51) and thus need to be [realized in some way] (http://clojuredocs.org/clojure_core/clojure.core/doall)
 - [flatten](http://clojuredocs.org/clojure_core/clojure.core/flatten) for some reason [doesn't jive](https://github.com/viperscape/kuroshio/issues/1), so steer clear for now and consider something like [apply concat](https://github.com/viperscape/kuroshio/issues/1#issuecomment-44845506)
