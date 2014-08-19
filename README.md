@@ -26,7 +26,9 @@ There are a few extras thrown in that may or may not get changed in future relea
 
 > Extras
 - [stream pools](https://github.com/viperscape/kuroshio/blob/master/examples/pool.clj), which are literally grouped streams; this is good for broadcasting to individual streams
-- ["bidirectional" channels](https://github.com/viperscape/kuroshio/blob/master/examples/bichan-example.clj), paired channels abstracted as a single channel to communicate between two ends
+- [bidirectional channels](https://github.com/viperscape/kuroshio/blob/master/examples/bichan-example.clj), paired channels abstracted as a single channel to communicate between two ends
+- [multicast streams](https://github.com/viperscape/kuroshio/blob/master/src/kuroshio/multi.clj), a multicast-socket connection to communicate between two processes (mostly experimental)
+- [async tasks](https://github.com/viperscape/kuroshio/blob/master/src/kuroshio/async.clj), a very basic implementation of some async tasking/generators using streams (definitely experimental); [take a peek](https://github.com/viperscape/kuroshio/blob/master/examples/async.clj)
 - identity checks for types stream?, pool?, chan?, bichan?, chan-data? (should you want to filter channel data from a stream)
 
 There are a few caveats to be aware of in kuroshio, which may or may not stick around as development progesses
