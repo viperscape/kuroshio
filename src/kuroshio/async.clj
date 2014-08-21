@@ -87,6 +87,17 @@
             (go-task (f) ts)))
   ([t ts to] (go-select t (go-sleep to ts) ts)))
 
+(defn go-chain 
+  "feed a task result into a subsequent function, returns task"
+  [^task t f ts] 
+  {:pre [(task? t)
+         (fn? f)]}
+  (let [step (fn _s [t f ts]
+               (if-let [r (not-empty (from (:c t)))]
+                 (yield (f (first r)))
+                 (yield (_s t f ts))))]
+    (go-task (step t f ts) ts)))
+
 (defn asmap 
   "eager, applies f to each item in coll; use in go-task"
   [f coll & results]
@@ -121,12 +132,19 @@
                         (f v (first coll))
                         (rest coll))))))
 
+(defn yield-unfold ;;*ignoreme*
+  ([fs]
+     (yield (yield-unfold (rest fs)
+                          ((first fs)))))
+  ([fs r]
+     (yield (yield-unfold (rest fs)
+                          ((first fs) r)))))
+
 (defn as-> 
   "reduces over collection of functions, for pipelining; use in go-task"
   [& fs]
   (let [_f 
         (fn step [fs r]
-          (prn fs r)
           (if (empty? fs) 
             r
             (yield (step (rest fs)

@@ -15,7 +15,7 @@
       tinc20 (go-task (increment 20 5) ts)
       tbye (go-task (prn :bye) ts)]
 
-  (while (go-step ts))
+  (while (go-step ts)) ;;step thru all tasks
 
   (from (:c tinc20))) ;; (25)
 
@@ -48,7 +48,7 @@
     (yield (my-even? (dec (Math/abs n))))))
 
 (let [ts (new-tasks)
-      e? (go-task (my-even? 1e4) ts)]
+      e? (go-task (my-even? 1002) ts)]
   (while (go-step ts))
   (from (:c e?))) ;;(true)
 
@@ -91,11 +91,11 @@
 ;; :inc 6
   
 (let [ts (new-tasks)
-      data (range 10)
+      data (range 10) ;; (0 ... 9)
       results (go-task 
                (asmap #(inc %) data)
                ts)
-      i (go-task (increment 10 10) ts)]
+      i (go-task (increment 10 10) ts)] ;;some other task intertwined
   (while (go-step ts))
   (take! (:c results))) ;; [1 2 3 4 5 6 7 8 9 10]
 
@@ -156,3 +156,14 @@
   (let [r1 (take! (:c pl)) ;; 6
         r2 (take! (:c pl2))] ;; -2
     (- r1 r2))) ;; 8
+
+;; chaining tasks
+(let [ts (new-tasks)
+      t (go-chain (go-sleep 100 ts) ;;some task
+                  (fn[_](inc 3)) ;;this task's result is 4
+                  ts)
+      dt (go-chain t ;;use the result from task t
+                   #(+ 4 %)
+                   ts)]
+  (while (go-step ts))
+  (take! (:c dt))) ;;8
