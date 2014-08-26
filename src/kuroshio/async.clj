@@ -140,7 +140,7 @@
      (yield (yield-unfold (rest fs)
                           ((first fs) r)))))
 
-(defn as-> 
+(defn as> 
   "reduces over collection of functions, for pipelining; use in go-task"
   [& fs]
   (let [_f 
