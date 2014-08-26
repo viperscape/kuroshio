@@ -144,11 +144,11 @@
 
 ;; async pipeline
 (let [ts (new-tasks)
-      pl (go-task (as->
+      pl (go-task (as>
                    #(inc 2)
                    #(+ % 3))
                   ts)
-      pl2 (go-task (as->
+      pl2 (go-task (as>
                    #(dec 2)
                    #(- % 3))
                   ts)]
