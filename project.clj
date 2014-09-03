@@ -1,5 +1,5 @@
 (defproject kuroshio "0.2.3-SNAPSHOT"
-  :description "stream-like thread communication"
+  :description "creating and operating on streams (delayed, lazily-evaluated, endless lists), enables simple thread communication via stream and chan"
   :url "https://github.com/viperscape/kuroshio"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
