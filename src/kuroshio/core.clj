@@ -3,20 +3,21 @@
 
 (defn v-> 
   "pushes new value onto tail"
-  [t v]
-  (let [p (promise)]
+  [t v & op]
+  (let [p (or (first op) (promise))]
     (if (deliver t (cons 
-                    (if-not v ::nil v) ;; may remove this nil transform
+                    (if-not v ::nil v) ;;note: I may remove this nil transform
                     (list p)))
       p)))
 
 (defn v<- 
   "pulls values from stream on demand, builds lazy seq"
   [s w]
-  (if (or (realized? s) w) ;; or wait
+  (if (or (realized? s) w) ;; "realized? or wait"
     (cons (first @s)
           (lazy-seq (v<- (second @s) w)))))
 
+;;note:depricated?
 (def >*
   "recursively finds tail, returns it"
   (fn 
@@ -35,9 +36,9 @@
 
 (defn v->* 
   "attempts to push new value onto tail, if not then recursively finds tail and tries again"
-  [t v]
+  [t v op]
   (loop [_t t]
-    (if-let [_ (v-> _t v)]
+    (if-let [_ (v-> _t v op)]
       _
       (recur (>* _t)))))
 
@@ -56,20 +57,21 @@
    head wait))
 
 (defprotocol S*
-  (put! [this v] "inserts value onto tail of stream & extends it")
+  (put! [this v] [this v op] "inserts value onto tail of stream & extends it")
   (shift! [this n] "shift head towards tail n times, returns shift count")
   (from [this] [this w] "returns lazy-seq of stream")
   (from! [this] [this w] "returns lazy-seq & moves head")
   (take! [this] "short hand for taking first with from!")
-  (get-tail [this]))
+  (get-tail [this] "aggresively finds tail.. use .tail member instead"))
 
 (defn- revert-nil [s]
   (map #(if (= ::nil %) nil %) s))
 
 (deftype s* [#^clojure.lang.Atom head ^{:volatile-mutable true} tail]
   S*
-  (put! [this v] 
-    (set! tail (v->* tail v))
+  (put! [this v] (put! this v nil))
+  (put! [this v op] 
+    (set! tail (v->* tail v op))
     tail)
   (shift! [this n] (count (take n (from! this))))
 
@@ -93,3 +95,9 @@
 
 (defn stream? [s]
   (= s* (type s)))
+
+(defn merge! 
+  "permanently merges two active streams, duplicates first val on s2 to s1; s2 must not be empty"
+  [s1 s2] 
+  (if-let [v (first (from s2))]
+    (put! s1 v @(.head s2))))

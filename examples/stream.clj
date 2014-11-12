@@ -63,3 +63,19 @@
     (prn (from! s1))) ;; (1 2 0 1 2 3 4 nil)
     ;; future then prints 2 0 2 4 and then quits
 )
+
+
+(let [s (new-stream)
+      s2 (new-stream)]
+
+  (put! s 1)
+  (put! s 2)
+  (put! s2 3)
+  (merge! s s2)
+  (put! s2 4)
+  (put! s2 5)
+  (put! s 6) ;;both streams are still active and now point to the same tip
+  (put! s2 7)
+  
+  (prn (from s)) ;;(1 2 3 4 5 6 7)
+  (prn (from s2))) ;;(3 4 5 6 7)
